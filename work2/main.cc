@@ -16,9 +16,14 @@ int f_count = 0,
     d_count = 0,
     ln_count = 0;
 
+const char *sz_names[] = {"B", "KB", "MB", "GB"};
+
+off_t bytes = 0;
+
 struct stat get_stat(const char *path);
 bool is_dir(const char *path);
 bool is_link(const char *path);
+off_t get_size(const char *path);
 void count(const char *path);
 std::string link_content(const char *path);
 int dirfilter(const struct dirent *d);
@@ -71,22 +76,30 @@ bool is_link(const char *path)
     return S_ISLNK(get_stat(path).st_mode);
 }
 
+off_t get_size(const char *path)
+{
+    struct stat st = get_stat(path);
+    return st.st_size;
+}
+
 void count(const char *path)
 {
     if (is_dir(path))
         d_count++;
     else if (is_link(path))
         ln_count++;
-    else
+    else {
         f_count++;
+        bytes += get_size(path);
+    }
 }
 
 std::string link_content(const char *path)
 {
-    struct stat st = get_stat(path);
-    char *s = (char *) malloc(st.st_size + 1);
+    off_t size = get_size(path);
+    char *s = (char *) malloc(size + 1);
     
-    readlink(path, s, st.st_size + 1);
+    readlink(path, s, size + 1);
     
     std::string res(s);
     free(s);
@@ -188,4 +201,10 @@ void print_stat()
     std::cout << "Files: " << f_count << std::endl
               << "Directories: " << d_count << std::endl
               << "Links: " << ln_count << std::endl;
+    int k = 0, sz = bytes;
+    while (sz >= 1024) {
+        sz >>= 10;
+        k++;
+    }
+    std::cout << "Total size: " << sz << sz_names[k] << std::endl;
 }
