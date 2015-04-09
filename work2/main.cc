@@ -12,10 +12,14 @@ const char tree_fork = 0x74,
            tree_horiz = 0x71;
 
 bool set[256];
+int f_count = 0, 
+    d_count = 0,
+    ln_count = 0;
 
 struct stat get_stat(const char *path);
 bool is_dir(const char *path);
 bool is_link(const char *path);
+void count(const char *path);
 std::string link_content(const char *path);
 int dirfilter(const struct dirent *d);
 int dirsort(const struct dirent **a,
@@ -27,6 +31,7 @@ std::string escape_box_drawing(char c);
 std::string escape_blue(std::string);
 void pretty_print_path(const char *path,
                        bool end, int l);
+void print_stat();
 
 const std::string s_tree_corner = escape_box_drawing(tree_corner),
                   s_tree_fork = escape_box_drawing(tree_fork),
@@ -43,6 +48,7 @@ int main(int argc, char *argv[])
         path = default_path;
     
     print_tree(path);
+    print_stat();
     
     return EXIT_SUCCESS;
 }
@@ -63,6 +69,16 @@ bool is_dir(const char *path)
 bool is_link(const char *path)
 {
     return S_ISLNK(get_stat(path).st_mode);
+}
+
+void count(const char *path)
+{
+    if (is_dir(path))
+        d_count++;
+    else if (is_link(path))
+        ln_count++;
+    else
+        f_count++;
 }
 
 std::string link_content(const char *path)
@@ -127,7 +143,8 @@ void print_tree_recursive(const char *path,
             
             if (is_end)
                 set[l] = false;
-            
+                
+            count(dirents[i]->d_name);
             print_tree_recursive(dirents[i]->d_name, is_end, l + 1);
             
             /* free malloc'd memory, not delete */
@@ -164,4 +181,11 @@ void pretty_print_path(const char *path, bool end, int l)
     std::cout << (is_dir(path) ? escape_blue(s_path) : s_path)
               << (is_link(path) ? " -> " + link_content(path) : "")
               << std::endl;
+}
+
+void print_stat()
+{
+    std::cout << "Files: " << f_count << std::endl
+              << "Directories: " << d_count << std::endl
+              << "Links: " << ln_count << std::endl;
 }
