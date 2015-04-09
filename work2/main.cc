@@ -97,12 +97,12 @@ void count(const char *path)
 std::string link_content(const char *path)
 {
     off_t size = get_size(path);
-    char *s = (char *) malloc(size + 1);
+    char *s = new char[size + 1];
     
     readlink(path, s, size + 1);
     
     std::string res(s);
-    free(s);
+    delete[] s;
     
     return res;
 }
