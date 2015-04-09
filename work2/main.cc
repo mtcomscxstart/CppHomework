@@ -5,7 +5,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <cwchar>
 
 const char tree_fork = 0x74,
            tree_corner = 0x6d,
