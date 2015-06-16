@@ -102,27 +102,3 @@ std::vector<DirEntry*> DirEntry::getChildren()
     std::sort(c.begin(), c.end(), cmp);
     return c;
 }
-
-void DirEntry::print(TreePrinter& p)
-{
-    std::string pretty;
-    
-    if (name.empty())
-        pretty = path;
-    else
-        pretty = name;
-        
-    if (isDir())
-        pretty = Term::blue(pretty);
-    else if (isLink())
-        pretty = Term::cyan(pretty) + " -> " + readLink();
-    else if (isExecutable())
-        pretty = Term::green(pretty);
-
-    p.put(pretty);
-
-    std::vector<DirEntry*> ch = getChildren();
-    p.enter(ch.size());
-    for (auto i : ch)
-        i->print(p);
-}

@@ -26,7 +26,6 @@ public:
     off_t size();
     DirEntry *getChild(std::string name);
     std::vector<DirEntry *> getChildren();
-    void print(TreePrinter& p);
 };
 
 #endif
